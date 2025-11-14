@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}Поиск - Архив стримов{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>🔍 Поиск по архиву</h1>
+    
+    <div class="search-container">
+        <form method="GET" action="/search" class="search-form">
+            <input 
+                type="text" 
+                name="q" 
+                value="{{ query }}" 
+                placeholder="Введите название стрима, дату или ключевое слово..." 
+                class="search-input"
+                autofocus
+            >
+            <button type="submit" class="search-btn">Поиск</button>
+        </form>
+    </div>
+    
+    {% if query %}
+        <div class="search-results">
+            <p class="results-info">
+                Результаты поиска по запросу: <strong>"{{ query }}"</strong>
+                <span class="results-count">(найдено: {{ results|length }})</span>
+            </p>
+            
+            {% if results %}
+                <div class="streams-grid">
+                    {% for stream in results %}
+                    <a href="/stream/{{ stream.id }}" class="stream-card">
+                        <div class="stream-thumbnail">
+                            {% if stream.thumbnail_url %}
+                                <img src="{{ stream.thumbnail_url }}" alt="{{ stream.title }}">
+                            {% else %}
+                                <div class="no-thumbnail">📺</div>
+                            {% endif %}
+                        </div>
+                        <div class="stream-info">
+                            <h3>{{ stream.title }}</h3>
+                            <p class="date">📅 {{ stream.stream_date.strftime('%d.%m.%Y %H:%M') }}</p>
+                            <p class="meta">
+                                ⏱️ {{ stream.duration_formatted }} | 💬 {{ stream.chat_message_count }} сообщений
+                            </p>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="no-results">
+                    <p>😔 По вашему запросу ничего не найдено</p>
+                    <p class="hint">Попробуйте использовать другие ключевые слова</p>
+                </div>
+            {% endif %}
+        </div>
+    {% else %}
+        <div class="search-empty">
+            <p>Введите запрос для поиска стримов</p>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+    .search-container {
+        margin: 2rem 0;
+    }
+    
+    .search-form {
+        display: flex;
+        gap: 1rem;
+        max-width: 600px;
+    }
+    
+    .search-input {
+        flex: 1;
+        padding: 0.8rem;
+        border: none;
+        border-radius: 5px;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        font-size: 1rem;
+        backdrop-filter: blur(10px);
+    }
+    
+    .search-input::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .search-input:focus {
+        outline: none;
+        background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .search-btn {
+        padding: 0.8rem 1.5rem;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 1rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+    
+    .search-btn:hover {
+        background: var(--secondary);
+    }
+    
+    .search-results {
+        margin-top: 2rem;
+    }
+    
+    .results-info {
+        color: rgba(255, 255, 255, 0.8);
+        margin-bottom: 1.5rem;
+        font-size: 1.1rem;
+    }
+    
+    .results-count {
+        color: var(--primary);
+        font-weight: bold;
+    }
+    
+    .no-results, .search-empty {
+        text-align: center;
+        padding: 3rem 1rem;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+        margin-top: 2rem;
+    }
+    
+    .no-results p, .search-empty p {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 1.1rem;
+    }
+    
+    .hint {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+</style>
+{% endblock %}

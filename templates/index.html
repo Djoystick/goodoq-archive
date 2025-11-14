@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h1>📺 Архив стримов канала {{ stats.channel }}</h1>
+    
+    <div class="stats-container">
+        <div class="stat-card">
+            <h3>📹 Всего видео</h3>
+            <p class="stat-value">{{ stats.total_videos }}</p>
+        </div>
+        <div class="stat-card">
+            <h3>💬 Сообщений в чате</h3>
+            <p class="stat-value">{{ stats.total_messages }}</p>
+        </div>
+    </div>
+    
+    <h2>Последние стримы</h2>
+    
+    <div class="streams-grid">
+        {% for stream in streams %}
+        <a href="/stream/{{ stream.id }}" class="stream-card">
+            <div class="stream-thumbnail">
+                {% if stream.thumbnail_url %}
+                    <img src="{{ stream.thumbnail_url }}" alt="{{ stream.title }}">
+                {% else %}
+                    <div class="no-thumbnail">📺</div>
+                {% endif %}
+            </div>
+            <div class="stream-info">
+                <h3>{{ stream.title }}</h3>
+                <p class="date">📅 {{ stream.stream_date.strftime('%d.%m.%Y %H:%M') }}</p>
+                <p class="meta">
+                    ⏱️ {{ stream.duration_formatted }} | 💬 {{ stream.chat_message_count }} сообщений
+                </p>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    
+    <!-- Пагинация -->
+    <div class="pagination">
+        {% if current_page > 1 %}
+            <a href="/?page=1">← Первая</a>
+            <a href="/?page={{ current_page - 1 }}">← Назад</a>
+        {% endif %}
+        
+        <span>Страница {{ current_page }} из {{ total_pages }}</span>
+        
+        {% if current_page < total_pages %}
+            <a href="/?page={{ current_page + 1 }}">Вперёд →</a>
+            <a href="/?page={{ total_pages }}">Последняя →</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

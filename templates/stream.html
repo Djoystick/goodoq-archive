@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}{{ stream.title }} - Архив{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="stream-player-container">
+        <div class="player-section">
+            <h1>{{ stream.title }}</h1>
+            <p class="meta">
+                Канал: <strong>{{ stream.channel_name }}</strong> | 
+                Дата: <strong>{{ stream.stream_date.strftime('%d.%m.%Y %H:%M') }}</strong>
+            </p>
+            
+            <video id="video-player" controls style="width: 100%; height: auto;">
+                <source src="{{ stream.local_video_path }}" type="video/mp4">
+                Ваш браузер не поддерживает видео.
+            </video>
+            
+            {% if stream.description %}
+            <div class="description">
+                <h3>Описание</h3>
+                <p>{{ stream.description }}</p>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="chat-section">
+            <h2>💬 Чат</h2>
+            <div id="chat-container" class="chat-messages">
+                <p style="text-align: center; color: #999;">Загрузка чата...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const streamId = {{ stream.id }};
+    const player = document.getElementById('video-player');
+    const chatContainer = document.getElementById('chat-container');
+    let chatMessages = [];
+    
+    // Загружаем чат
+    fetch(`/api/stream/${streamId}/chat`)
+        .then(r => r.json())
+        .then(data => {
+            chatMessages = data.messages;
+            renderChat();
+            
+            // Синхронизуем чат с видео
+            player.addEventListener('timeupdate', () => {
+                const currentTime = player.currentTime;
+                const visibleMessages = chatMessages.filter(m => 
+                    m.time >= currentTime - 30 && m.time <= currentTime
+                );
+                updateChatDisplay(visibleMessages);
+            });
+        });
+    
+    function renderChat() {
+        chatContainer.innerHTML = '';
+        chatMessages.forEach(msg => {
+            const msgEl = document.createElement('div');
+            msgEl.className = 'chat-message';
+            if (msg.is_mod) msgEl.classList.add('mod');
+            if (msg.is_sub) msgEl.classList.add('subscriber');
+            
+            msgEl.innerHTML = `
+                <span class="username">${msg.username}</span>
+                <span class="message">${msg.text}</span>
+                <span class="time">${msg.time_formatted}</span>
+            `;
+            
+            chatContainer.appendChild(msgEl);
+        });
+    }
+    
+    function updateChatDisplay(messages) {
+        if (messages.length === 0) {
+            chatContainer.innerHTML = '<p style="color: #999; text-align: center;">Нет сообщений в этот момент</p>';
+            return;
+        }
+        
+        chatContainer.innerHTML = '';
+        messages.forEach(msg => {
+            const msgEl = document.createElement('div');
+            msgEl.className = 'chat-message active';
+            msgEl.innerHTML = `
+                <span class="username">${msg.username}</span>
+                <span class="message">${msg.text}</span>
+            `;
+            chatContainer.appendChild(msgEl);
+        });
+    }
+</script>
+{% endblock %}

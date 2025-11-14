@@ -1,0 +1,8 @@
+Flask==2.3.3
+Flask-SQLAlchemy==3.0.5
+Flask-CORS==4.0.0
+yt-dlp==2023.10.13
+requests==2.31.0
+schedule==1.2.0
+SQLAlchemy==2.0.20
+python-dotenv==1.0.0
